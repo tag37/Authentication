@@ -38,3 +38,8 @@ END;
 --order by mic
 
 -- select * from TradingHoliday 
+SELECT 
+    YourColumn,
+    CAST(SUBSTRING(YourColumn, PATINDEX('%[-+0-9]%', YourColumn), LEN(YourColumn)) AS INT) AS ExtractedInteger
+FROM YourTable
+WHERE PATINDEX('%[-+0-9]%', YourColumn) > 0;
