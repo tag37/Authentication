@@ -43,3 +43,14 @@ SELECT
     CAST(SUBSTRING(YourColumn, PATINDEX('%[-+0-9]%', YourColumn), LEN(YourColumn)) AS INT) AS ExtractedInteger
 FROM YourTable
 WHERE PATINDEX('%[-+0-9]%', YourColumn) > 0;
+
+SELECT 
+    YourColumn,
+    TRY_CAST(
+        -- Extract the first contiguous number (with optional sign) from the string
+        LEFT(
+            SUBSTRING(YourColumn, PATINDEX('%[-+]%[0-9]%', YourColumn + '0'), 10),
+            PATINDEX('%[^0-9]%', SUBSTRING(YourColumn, PATINDEX('%[-+]%[0-9]%', YourColumn + '0'), 10) + 'X') - 1
+        ) AS INT
+    ) AS ExtractedInteger
+FROM YourTable;
