@@ -127,3 +127,17 @@ API base URLs
 The design is extensible, allowing additional configuration sections to be added in the future as needed — for example, credentials, feature flags, environment-specific values, or third-party service keys.
 
 Using this approach, we maintain a centralized and scalable configuration model that supports dependency injection and promotes reusability across test components.
+
+
+Test Reporting with ExtentReports
+We use ExtentReports to generate detailed and interactive test execution reports.
+
+During the execution of each step, we utilize hooks to track the outcome (pass or fail) of that step. Based on the result, we update the status of the current scenario accordingly in the report.
+
+This approach ensures:
+
+Every step’s result (Given, When, Then) is logged with status and message.
+
+Failures are captured immediately and marked clearly in the report.
+
+At the end of the scenario, the overall test outcome is determined and recorded.
