@@ -112,3 +112,18 @@ public class UserSteps
     }
 }
 📸 You can insert a screenshot here showing step navigation in Visual Studio.
+
+
+In our test framework, application configuration values (such as database and API connection settings) are loaded from the appsettings.json file during the execution of the BeforeScenario hook.
+
+This ensures that all required settings are initialized before any test steps run.
+
+Currently, the configuration includes essential values like:
+
+Database connection strings
+
+API base URLs
+
+The design is extensible, allowing additional configuration sections to be added in the future as needed — for example, credentials, feature flags, environment-specific values, or third-party service keys.
+
+Using this approach, we maintain a centralized and scalable configuration model that supports dependency injection and promotes reusability across test components.
