@@ -1,0 +1,114 @@
+🔧 Service Registration
+Service registration is the process of configuring required services (like databases, APIs, or custom services) that need to be available throughout the application using Dependency Injection (DI).
+
+These services are typically registered at the beginning of a scenario's lifecycle — usually within a hook like BeforeScenario — to ensure a fresh and isolated environment for each test.
+
+📌 Key Points
+Services like DbContext, HttpClient, and custom services must be registered before test steps are executed.
+
+Registration is often done using a custom TestStartup.cs or in hooks via a DI container.
+
+Hooks can be executed conditionally using tags (e.g., [TestCategory("Database")]) for more targeted setup logic.
+
+💡 Example
+csharp
+Copy
+Edit
+// Registering services in TestStartup.cs or Hook initialization
+services.AddSingleton<IUserService, UserService>();
+services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(Configuration.GetConnectionString("TestDatabase")));
+
+services.AddHttpClient("ApiClient", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:5001/api/");
+});
+csharp
+Copy
+Edit
+[BeforeScenario("Database")]
+public void SetupDatabase()
+{
+    // Logic that runs only for scenarios tagged with @Database
+}
+♻️ Resource Sharing Context
+The Shared Context (also known as SharedTestContext or a similar custom class) is a singleton object that acts as a central place to store and share data across different parts of the test flow — such as Given, When, Then steps.
+
+It is injected via Dependency Injection, enabling any class (Step Definition, Hooks, etc.) to access or update the shared state without coupling tightly.
+
+📌 Common Uses
+Store HTTP responses
+
+Keep user tokens or IDs
+
+Preserve test-specific flags or temporary values
+
+🧠 Example
+csharp
+Copy
+Edit
+public class SharedTestContext
+{
+    public HttpResponseMessage? LastResponse { get; set; }
+    public string? AuthToken { get; set; }
+    public Dictionary<string, object> Data { get; } = new();
+}
+Used in a step definition:
+
+csharp
+Copy
+Edit
+public class LoginSteps
+{
+    private readonly SharedTestContext _context;
+
+    public LoginSteps(SharedTestContext context)
+    {
+        _context = context;
+    }
+
+    [When("the user logs in")]
+    public async Task WhenTheUserLogsIn()
+    {
+        var response = await _httpClient.PostAsync("/login", content);
+        _context.LastResponse = response;
+    }
+}
+🧩 Step Definitions
+Step Definitions are C# methods that are mapped to steps written in .feature files using regular expressions. These functions implement the actual logic behind each Given, When, or Then.
+
+The ReqnRoll (SpecFlow-based) framework scans for these method attributes and executes them when matching steps are encountered in a test run.
+
+📌 Key Features
+Each step in the feature file corresponds to a C# method decorated with [Given], [When], [Then], or [And] attributes.
+
+Regular expressions are used in the attributes to dynamically capture parameters.
+
+Most IDEs (e.g., Visual Studio) allow navigation from feature steps directly to the implementation — making the test code more readable and maintainable.
+
+🔍 Example
+csharp
+Copy
+Edit
+[Binding]
+public class UserSteps
+{
+    [Given(@"the user ""(.*)"" exists")]
+    public void GivenTheUserExists(string username)
+    {
+        // Logic to seed the user into the test database
+    }
+
+    [When(@"the user logs in with password ""(.*)""")]
+    public async Task WhenTheUserLogsIn(string password)
+    {
+        // Perform login call and capture response
+    }
+
+    [Then(@"the login should be successful")]
+    public void ThenLoginSuccess()
+    {
+        // Assert status code or response payload
+    }
+}
+📸 You can insert a screenshot here showing step navigation in Visual Studio.
