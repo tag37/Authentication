@@ -1,0 +1,27 @@
+# Define output file
+$outputFile = "packages-report.txt"
+
+# Clear the output file first
+Remove-Item -Path $outputFile -ErrorAction SilentlyContinue
+
+# Loop through each .csproj file
+Get-ChildItem -Recurse -Filter *.csproj | ForEach-Object {
+    $projectPath = $_.FullName
+    $projectName = $_.BaseName
+
+    # Add a section header
+    Add-Content -Path $outputFile -Value "======================================================="
+    Add-Content -Path $outputFile -Value "Project: $projectName"
+    Add-Content -Path $outputFile -Value "Path:    $projectPath"
+    Add-Content -Path $outputFile -Value "-------------------------------------------------------"
+
+    # Run the command and store output as plain text
+    $output = & dotnet list "$projectPath" package --include-transitive --verbosity quiet 2>&1
+
+    # Write the output to file line by line
+    $output | ForEach-Object {
+        Add-Content -Path $outputFile -Value $_
+    }
+
+    Add-Content -Path $outputFile -Value "`r`n"  # Add blank line between projects
+}
