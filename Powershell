@@ -24,4 +24,13 @@ Get-ChildItem -Recurse -Filter *.csproj | ForEach-Object {
     }
 
     Add-Content -Path $outputFile -Value "`r`n"  # Add blank line between projects
+libcurl is a native C library and is not directly supported in .NET applications. To use it within a .NET project, it typically requires platform invocation via DllImport, or integration through a third-party NuGet package that wraps the native library—such as CurlSharp or LibCurlNet.
+
+These packages act as .NET bindings but still depend on a system-installed version of libcurl and use interop to invoke its functions at runtime.
+
+Therefore, to detect any usage of libcurl in a .NET codebase, we should:
+
+Check for references to NuGet packages like CurlSharp or LibCurlNet
+
+Search for any use of DllImport targeting libcurl (e.g., DllImport("libcurl"))
 }
