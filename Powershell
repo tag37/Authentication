@@ -34,3 +34,15 @@ Check for references to NuGet packages like CurlSharp or LibCurlNet
 
 Search for any use of DllImport targeting libcurl (e.g., DllImport("libcurl"))
 }
+
+
+$searchText = "libcurl"
+$directory = "C:\Path\To\Your\Project"  # Change this to your codebase root
+
+Get-ChildItem -Path $directory -Recurse -Include *.cs | ForEach-Object {
+    $matches = Select-String -Path $_.FullName -Pattern $searchText
+    if ($matches) {
+        Write-Host "Found in: $($_.FullName)"
+        $matches | ForEach-Object { Write-Host "  Line $($_.LineNumber): $($_.Line.Trim())" }
+    }
+}
