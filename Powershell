@@ -46,3 +46,11 @@ Get-ChildItem -Path $directory -Recurse -Include *.cs | ForEach-Object {
         $matches | ForEach-Object { Write-Host "  Line $($_.LineNumber): $($_.Line.Trim())" }
     }
 }
+Get-ChildItem -Path "C:\Your\Project\Path" -Recurse -Filter *.dll | ForEach-Object {
+    $version = (Get-Item $_.FullName).VersionInfo.FileVersion
+    [PSCustomObject]@{
+        FileName = $_.Name
+        FullPath = $_.FullName
+        Version  = $version
+    }
+} | Format-Table -AutoSize
