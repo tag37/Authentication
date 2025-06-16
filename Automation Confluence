@@ -141,3 +141,10 @@ Every step’s result (Given, When, Then) is logged with status and message.
 Failures are captured immediately and marked clearly in the report.
 
 At the end of the scenario, the overall test outcome is determined and recorded.
+
+
+Get-ChildItem -Recurse -Filter *.csproj | ForEach-Object {
+    Add-Content "packages-report.txt" "==== $($_.FullName) ===="
+    dotnet list $_.FullName package --include-transitive >> "packages-report.txt"
+    Add-Content "packages-report.txt" "`n"
+}
