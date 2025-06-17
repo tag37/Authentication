@@ -1,0 +1,86 @@
+using System.Security.Claims;
+using System.Text.Json;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.Resource;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add authentication & Microsoft Graph configuration
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = "Microsoft";
+    })
+    .AddCookie()
+    .AddOAuth("Microsoft", options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
+        options.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
+        options.CallbackPath = "/signin-microsoft";
+
+        options.AuthorizationEndpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
+        options.TokenEndpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+        options.UserInformationEndpoint = "https://graph.microsoft.com/v1.0/me";
+
+        options.Scope.Clear();
+        options.Scope.Add("openid");
+        options.Scope.Add("profile");
+        options.Scope.Add("email");
+        options.Scope.Add("https://graph.microsoft.com/User.Read");
+        options.SaveTokens = true;
+
+        options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+        options.ClaimActions.MapJsonKey(ClaimTypes.Name, "displayName");
+        options.ClaimActions.MapJsonKey(ClaimTypes.Email, "mail");
+
+        options.Events = new OAuthEvents
+        {
+            OnCreatingTicket = async context =>
+            {
+                var req = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+                req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", context.AccessToken);
+                var resp = await context.Backchannel.SendAsync(req);
+                resp.EnsureSuccessStatusCode();
+
+                using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+                context.RunClaimActions(doc.RootElement);
+            }
+        };
+    });
+
+var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapGet("/", () => "Hello World!");
+
+// Login endpoint: redirects to Azure AD
+app.MapGet("/login", async (HttpContext ctx) =>
+{
+    await ctx.ChallengeAsync("Microsoft", new AuthenticationProperties
+    {
+        RedirectUri = "/profile"
+    });
+});
+
+// Profile endpoint: requires authentication
+app.MapGet("/profile", async (HttpContext ctx) =>
+{
+    var result = await ctx.AuthenticateAsync();
+    if (!result.Succeeded)
+    {
+        ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        await ctx.Response.WriteAsync("Unauthorized");
+        return;
+    }
+
+    var claims = result.Principal!.Claims
+        .Select(c => new { c.Type, c.Value });
+    await ctx.Response.WriteAsJsonAsync(claims);
+});
+
+app.Run();
