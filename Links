@@ -1,1 +1,29 @@
 https://learn.microsoft.com/en-us/entra/msal/dotnet/acquiring-tokens/web-apps-apis/authorization-codes
+Windows authentication 
+https://learn.microsoft.com/en-us/aspnet/core/security/authentication/windowsauth?view=aspnetcore-9.0&utm_source=chatgpt.com&tabs=visual-studio
+
+Windows Authentication relies on the operating system to authenticate users … used for servers that run on a corporate network using Active Directory domain identities … best suited to intranet environments where users, client apps, and web servers belong to the same Windows domain.
+https://github.com/dotnet/aspnetcore/issues/13861
+
+🛑 Why It Doesn’t Work for a Pure REST API
+A pure REST API (like your backend) does not have a UI or redirect capability. So:
+
+There’s no browser to show a Microsoft login popup.
+
+There’s no way to redirect to Azure AD login.
+
+There’s no session or UI context.
+
+It’s meant to be accessed by:
+
+JavaScript (from a frontend app)
+
+Other services (machine-to-machine)
+
+👉 That’s why REST APIs use token-based authentication only — you must provide a Bearer token from a login process that already happened elsewhere (e.g., web frontend or postman or service).
+
+https://www.youtube.com/watch?v=sx-I9N2mQ98
+https://www.youtube.com/watch?v=sx-I9N2mQ98
+
+1. Seperate App registration for Swagger UI -> Give there redirect URL
+2. In rest api registration we need to add swagger registration id like we are giving this client permiision to access.
