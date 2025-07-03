@@ -20,3 +20,36 @@ JavaScript (from a frontend app)
 Other services (machine-to-machine)
 
 👉 That’s why REST APIs use token-based authentication only — you must provide a Bearer token from a login process that already happened elsewhere (e.g., web frontend or postman or service).
+
+
+
+
+Here's a concise and clear response you can send to the support team or include in your incident report to help them understand the issue:
+
+📝 Incident Summary: OperationCanceledException in GraphQL API
+Timestamp (UTC): 2025-07-02T23:38:46.425987Z
+Exception: System.OperationCanceledException
+Library: HotChocolate.Execution (v13.9.1.40)
+Method: WorkScheduler.ExecuteInternalAsync
+
+💥 What Happened:
+The system threw an OperationCanceledException during the execution of a GraphQL query. This occurs when the current operation is explicitly cancelled by the runtime before completion.
+
+📌 Root Cause:
+This is not an unhandled bug but an expected exception when a task is cancelled due to one of the following:
+
+The client aborted the HTTP request (e.g. user navigated away or closed the browser tab).
+A timeout occurred (server-side or from infrastructure like a load balancer).
+A cancellation token was triggered intentionally (e.g. due to request timeout policy or graceful shutdown).
+🧩 Technical Details:
+The cancellation originated in System.Threading.CancellationToken.ThrowOperationCanceledException().
+The request was being processed by HotChocolate.Execution.Processing.WorkScheduler.ExecuteInternalAsync.
+The outer message confirms: "The operation was canceled."
+✅ Next Steps:
+Monitor for frequency — if this is rare, it is most likely due to client-side or environmental interruptions.
+Review timeout configuration in GraphQL setup and hosting environment:
+GraphQL .SetRequestTimeout(...)
+Web server timeouts (Kestrel/IIS/Nginx/etc.)
+Log cancellation reason (if applicable) by checking cancellationToken.IsCancellationRequested in resolvers.
+ℹ️ Conclusion:
+This is a controlled exception indicating the operation was cancelled, likely due to timeout or client disconnect. No action is required unless it becomes frequent or affects user experience.
