@@ -27,3 +27,8 @@ https://www.youtube.com/watch?v=sx-I9N2mQ98
 
 1. Seperate App registration for Swagger UI -> Give there redirect URL
 2. In rest api registration we need to add swagger registration id like we are giving this client permiision to access.
+
+
+Custom Exception Handling
+Status: In Progress
+Details: Currently facing technical challenges in publishing custom exceptions to Application Insights from a background service. Actively working on integrating proper tracing, logging, and telemetry flushing to ensure exceptions are captured and reported correctly.
